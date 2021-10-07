@@ -1,0 +1,96 @@
+---
+title: "horror"
+author: "Daniel Kerstan"
+date: "10/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(gt)
+```
+
+```{r}
+movies <- read_csv(here("horror_movies.csv"))
+```
+
+```{r}
+survey <- read_csv(here("Horror_movie_test.csv"))
+
+```
+
+```{r}
+
+colnames(survey) <- c("Timestamp", "scifi", "supernatural", "religious", "gore", "profound", "jovial", "jump", "person", "quality", "creative")
+responses <- survey %>% 
+  select(-Timestamp) %>% 
+  mutate(across(.cols = everything(), ~ str_trunc(string = .x, width = 2, ellipsis = ""))) %>% 
+  mutate(across(.cols = everything(), ~ as.numeric(.x)))
+
+responses_mean <- responses %>% 
+  summarize(across(.cols = everything(), .fns = mean)) %>% 
+  mutate(type = "survey") %>% 
+  relocate(type, .before = scifi)
+
+mean_vec <- as.vector(responses_mean)
+
+```
+
+```{r}
+movies_non_dev <- movies
+
+deviation_df <- movies
+
+for (i in 1:nrow(movies_non_dev)) {
+  for (j in 2:ncol(movies_non_dev)) {
+      deviation_df[[i,j]] <- abs((movies_non_dev[[i,j]]) - (responses_mean[[1,j]]))
+    }
+ }
+```
+
+```{r}
+
+deviation_total <- deviation_df %>% 
+  mutate(total_dev = NA)
+
+
+for (i in 1:nrow(deviation_df)) {
+  for (j in 2:ncol(deviation_df)) {
+      deviation_total[[i,ncol(deviation_total)]] <- (deviation_df[[i,2]] + 
+                                                       deviation_df[[i,3]] + 
+                                                       deviation_df[[i,4]] + 
+                                                       deviation_df[[i,5]] + 
+                                                       deviation_df[[i,6]] + 
+                                                       deviation_df[[i,7]] + 
+                                                       deviation_df[[i,8]] + 
+                                                       deviation_df[[i,9]] +
+                                                       deviation_df[[i,10]])
+    }
+ }
+```
+
+```{r}
+final_df <- deviation_total %>% 
+  select(title, total_dev) %>% 
+  arrange(total_dev)
+
+
+
+gt(final_df)
+
+
+
+
+```
+
+
+
+
+```{r}
+
+
+
+```
+
