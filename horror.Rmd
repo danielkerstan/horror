@@ -12,6 +12,7 @@ library(tidyverse)
 library(gt)
 ```
 
+
 ```{r}
 movies <- read_csv(here("horror_movies.csv"))
 ```
